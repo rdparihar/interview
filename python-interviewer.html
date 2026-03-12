@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Interviewer Guide | All-In-One</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .active-tag { background-color: #7c3aed !important; color: white !important; }
+        .details-hidden { display: none; }
+        .card-enter { animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        pre { white-space: pre-wrap; word-break: break-word; }
+    </style>
+</head>
+<body class="bg-slate-50 flex min-h-screen">
+
+    <aside class="w-64 bg-slate-900 text-slate-300 p-6 sticky top-0 h-screen overflow-y-auto hidden lg:block">
+        <div class="mb-8">
+            <a href="index.html" class="text-purple-400 font-bold hover:text-white transition-all text-sm uppercase">← Dashboard</a>
+        </div>
+        <div class="mb-10 font-black text-2xl tracking-tighter text-white">PY <span class="text-purple-500">HIRE</span></div>
+
+        <h2 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Interview Domains</h2>
+        <nav class="space-y-2" id="tagList">
+            <button onclick="filterTag('all')" class="active-tag w-full text-left px-4 py-2 rounded-xl text-sm font-bold transition-all">All Questions</button>
+            <button onclick="filterTag('Core Language')" class="w-full text-left px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all">Core Language</button>
+            <button onclick="filterTag('OOP')" class="w-full text-left px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all">OOP</button>
+            <button onclick="filterTag('Data Structures')" class="w-full text-left px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all">Data Structures</button>
+            <button onclick="filterTag('Concurrency')" class="w-full text-left px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all">Concurrency</button>
+            <button onclick="filterTag('Performance')" class="w-full text-left px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all">Performance</button>
+            <button onclick="filterTag('Testing')" class="w-full text-left px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all">Testing</button>
+            <button onclick="filterTag('Algorithms')" class="w-full text-left px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all">Algorithms</button>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-6 md:p-12">
+        <header class="mb-10 flex justify-between items-end">
+            <div>
+                <h1 class="text-4xl font-black text-slate-900 tracking-tight">Python <span class="text-purple-600">Interviewer</span></h1>
+                <p class="text-slate-500 font-medium italic mt-2 text-lg">Lead the conversation. Score the candidate.</p>
+            </div>
+            <div id="stats" class="bg-purple-100 text-purple-700 px-4 py-2 rounded-full font-black text-xs uppercase tracking-widest">
+                Scenarios: 50
+            </div>
+        </header>
+
+        <div class="relative mb-10">
+            <input type="text" id="searchInput" onkeyup="searchContent()"
+                placeholder="Search topics (e.g. 'GIL', 'decorator', 'async')..."
+                class="w-full p-5 pl-14 rounded-2xl border-2 border-slate-200 shadow-sm focus:border-purple-500 focus:outline-none bg-white text-lg transition-all">
+            <svg class="w-6 h-6 absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+
+        <div id="questionsContainer" class="space-y-6"></div>
+    </main>
+
+<script>
+    const pythonData = [
+        // ── Core Language ──────────────────────────────────────────────
+        {
+            tag: "Core Language",
+            prompt: "What is the difference between `is` and `==` in Python? Give an example where they return different results.",
+            answer: "`==` checks value equality; `is` checks identity (same object in memory). `a = [1,2]; b = [1,2]; a == b` is True but `a is b` is False.",
+            keywords: ["Object identity", "id()", "Small integer cache", "Interning"]
+        },
+        {
+            tag: "Core Language",
+            prompt: "Explain Python's mutable default argument trap. How do you fix it?",
+            answer: "Default args are evaluated once at definition time. `def f(lst=[]):` shares the same list across all calls. Fix: use `None` as default and assign inside the function.",
+            keywords: ["Mutable vs immutable", "None sentinel", "Function __defaults__", "Gotcha"]
+        },
+        {
+            tag: "Core Language",
+            prompt: "What are Python decorators? Write a simple timing decorator.",
+            answer: "A decorator is a higher-order function that wraps another function to extend its behavior without modifying it. Use `functools.wraps` to preserve metadata.",
+            keywords: ["Higher-order function", "functools.wraps", "Closure", "@syntax"]
+        },
+        {
+            tag: "Core Language",
+            prompt: "Explain the difference between `*args` and `**kwargs`. When would you use each?",
+            answer: "`*args` collects positional arguments into a tuple; `**kwargs` collects keyword arguments into a dict. Use `*args` for variadic positional, `**kwargs` for named options.",
+            keywords: ["Variadic", "Tuple unpacking", "Dict unpacking", "Forwarding calls"]
+        },
+        {
+            tag: "Core Language",
+            prompt: "What is a generator in Python and how does it differ from a list comprehension?",
+            answer: "A generator uses `yield` and produces values lazily one at a time, consuming O(1) memory. A list comprehension eagerly builds the entire list in memory.",
+            keywords: ["yield", "Lazy evaluation", "Memory efficiency", "__next__"]
+        },
+        {
+            tag: "Core Language",
+            prompt: "Explain Python's LEGB scope rule with an example.",
+            answer: "LEGB = Local → Enclosing → Global → Built-in. Python resolves names by searching each scope in that order. `global` and `nonlocal` keywords alter write access.",
+            keywords: ["Namespace", "Closure", "nonlocal", "global keyword"]
+        },
+        {
+            tag: "Core Language",
+            prompt: "What is the difference between `deepcopy` and `copy` (shallow copy)?",
+            answer: "Shallow copy creates a new object but references the same nested objects. Deep copy recursively duplicates all nested objects. Use `copy.deepcopy` for fully independent copies.",
+            keywords: ["copy module", "Reference semantics", "Nested objects", "Mutation"]
+        },
+        {
+            tag: "Core Language",
+            prompt: "How does Python's `with` statement and context manager protocol work?",
+            answer: "The `with` statement calls `__enter__` on entry and `__exit__` on exit (even on exceptions), ensuring cleanup. Implement via class methods or `contextlib.contextmanager`.",
+            keywords: ["__enter__", "__exit__", "Resource management", "contextlib"]
+        },
+        {
+            tag: "Core Language",
+            prompt: "Explain list, dict, and set comprehensions. When should you prefer a generator expression instead?",
+            answer: "Comprehensions produce concrete containers eagerly. Use a generator expression `(x for x in ...)` when you only iterate once or the dataset is large, to save memory.",
+            keywords: ["Comprehension syntax", "Memory", "Single-pass", "Readability"]
+        },
+        {
+            tag: "Core Language",
+            prompt: "What are Python's dunder (magic) methods? Name five and describe their use.",
+            answer: "`__init__` (constructor), `__str__`/`__repr__` (string representation), `__len__` (length), `__eq__` (equality), `__iter__` (iteration protocol).",
+            keywords: ["Protocol", "Operator overloading", "Data model", "__repr__"]
+        },
+        // ── OOP ────────────────────────────────────────────────────────
+        {
+            tag: "OOP",
+            prompt: "Explain Python's MRO (Method Resolution Order) and how `super()` works in multiple inheritance.",
+            answer: "MRO uses the C3 linearization algorithm. `super()` follows the MRO to call the next class in the chain, enabling cooperative multiple inheritance.",
+            keywords: ["C3 linearization", "Diamond problem", "__mro__", "Cooperative inheritance"]
+        },
+        {
+            tag: "OOP",
+            prompt: "What is the difference between `@classmethod`, `@staticmethod`, and an instance method?",
+            answer: "Instance methods receive `self`. `@classmethod` receives `cls` and can access/modify class state. `@staticmethod` receives neither — it's a plain function namespaced in the class.",
+            keywords: ["cls", "self", "Factory pattern", "Namespace"]
+        },
+        {
+            tag: "OOP",
+            prompt: "How do you implement a Singleton pattern in Python?",
+            answer: "Override `__new__` to return the same instance if it already exists, or use a module-level variable (modules are singletons by nature), or a metaclass.",
+            keywords: ["__new__", "Module-level", "Metaclass", "Thread safety"]
+        },
+        {
+            tag: "OOP",
+            prompt: "What are Python descriptors? How do `@property`, `getter`, and `setter` use them?",
+            answer: "Descriptors implement `__get__`, `__set__`, or `__delete__`. `@property` is a built-in descriptor that makes methods look like attributes, enabling validation on access.",
+            keywords: ["__get__", "__set__", "Data descriptor", "Non-data descriptor"]
+        },
+        {
+            tag: "OOP",
+            prompt: "Explain abstract base classes (ABCs) in Python. When would you use them over duck typing?",
+            answer: "ABCs (from `abc` module) enforce interface contracts at class-definition time. Use ABCs when you need explicit interface enforcement in a large codebase or library API.",
+            keywords: ["abc.ABC", "@abstractmethod", "isinstance check", "Interface contract"]
+        },
+        {
+            tag: "OOP",
+            prompt: "What is `__slots__` and when should you use it?",
+            answer: "`__slots__` restricts instance attributes to a fixed set, replacing the per-instance `__dict__` with a compact array. Use it for memory-critical classes with many instances.",
+            keywords: ["Memory optimization", "__dict__", "Attribute restriction", "Performance"]
+        },
+        {
+            tag: "OOP",
+            prompt: "How does Python handle operator overloading? Give an example with `__add__` and `__radd__`.",
+            answer: "`__add__` handles `a + b` when `a` is the left operand. If that returns `NotImplemented`, Python tries `b.__radd__(a)`. This enables mixed-type arithmetic.",
+            keywords: ["NotImplemented", "Reflected operators", "Data model", "__iadd__"]
+        },
+        // ── Data Structures ────────────────────────────────────────────
+        {
+            tag: "Data Structures",
+            prompt: "What is the time complexity of common dict operations in Python? How is a dict implemented internally?",
+            answer: "Average O(1) for get/set/delete. CPython dicts are open-addressing hash tables with a compact layout since Python 3.6 (also insertion-ordered since 3.7).",
+            keywords: ["Hash table", "Open addressing", "Amortized O(1)", "Collision"]
+        },
+        {
+            tag: "Data Structures",
+            prompt: "When would you use `collections.defaultdict` vs `collections.Counter` vs `collections.OrderedDict`?",
+            answer: "`defaultdict` auto-initializes missing keys. `Counter` counts hashable items. `OrderedDict` preserves insertion order (less relevant in 3.7+ but still has `move_to_end`).",
+            keywords: ["collections module", "Missing keys", "Frequency count", "Order guarantee"]
+        },
+        {
+            tag: "Data Structures",
+            prompt: "Explain the difference between a `list` and a `deque`. When is a deque preferable?",
+            answer: "`list` has O(1) append/pop from the right but O(n) from the left. `collections.deque` supports O(1) append/pop from both ends — ideal for queues and sliding windows.",
+            keywords: ["collections.deque", "O(1) appendleft", "Queue", "Sliding window"]
+        },
+        {
+            tag: "Data Structures",
+            prompt: "How does Python's `heapq` module work? How do you implement a max-heap?",
+            answer: "`heapq` provides a min-heap. For a max-heap, negate values before pushing and negate again when popping.",
+            keywords: ["Min-heap", "heappush/heappop", "Negation trick", "Priority queue"]
+        },
+        {
+            tag: "Data Structures",
+            prompt: "What is a `frozenset` and when would you use it over a regular set?",
+            answer: "`frozenset` is an immutable, hashable set. Use it as a dict key or set element when you need a set of sets, or to signal that a collection should not change.",
+            keywords: ["Immutable", "Hashable", "Set of sets", "Dict key"]
+        },
+        {
+            tag: "Data Structures",
+            prompt: "Explain Python's `bisect` module. Give a use case.",
+            answer: "`bisect` provides binary search helpers (`bisect_left`, `bisect_right`, `insort`) for maintaining sorted lists efficiently. Use it for O(log n) insertion into sorted arrays.",
+            keywords: ["Binary search", "O(log n)", "insort", "Sorted list maintenance"]
+        },
+        // ── Concurrency ────────────────────────────────────────────────
+        {
+            tag: "Concurrency",
+            prompt: "What is the GIL? How does it affect multi-threaded Python programs?",
+            answer: "The Global Interpreter Lock is a mutex in CPython that allows only one thread to execute Python bytecode at a time. It limits CPU-bound threading but doesn't affect I/O-bound concurrency.",
+            keywords: ["CPython", "I/O-bound vs CPU-bound", "GIL release", "C extensions"]
+        },
+        {
+            tag: "Concurrency",
+            prompt: "When would you use `threading` vs `multiprocessing` vs `asyncio`?",
+            answer: "`threading`: I/O-bound tasks sharing state. `multiprocessing`: CPU-bound tasks needing true parallelism. `asyncio`: high-concurrency I/O with cooperative multitasking and minimal overhead.",
+            keywords: ["GIL bypass", "Event loop", "Process pool", "Coroutine"]
+        },
+        {
+            tag: "Concurrency",
+            prompt: "Explain `asyncio` event loop, `async def`, `await`, and `Task`. How do you run multiple coroutines concurrently?",
+            answer: "The event loop schedules coroutines. `async def` defines a coroutine. `await` suspends until a result is ready. `asyncio.gather()` runs multiple coroutines concurrently.",
+            keywords: ["asyncio.gather", "Task", "Event loop", "Non-blocking"]
+        },
+        {
+            tag: "Concurrency",
+            prompt: "What is a race condition? How do you prevent it in Python threads?",
+            answer: "A race condition occurs when two threads read/modify shared state unsafely. Prevent with `threading.Lock`, `RLock`, or thread-safe data structures like `queue.Queue`.",
+            keywords: ["threading.Lock", "Critical section", "queue.Queue", "Atomicity"]
+        },
+        {
+            tag: "Concurrency",
+            prompt: "What is `concurrent.futures`? Compare `ThreadPoolExecutor` and `ProcessPoolExecutor`.",
+            answer: "`concurrent.futures` provides a high-level interface. `ThreadPoolExecutor` uses threads (GIL-limited for CPU work). `ProcessPoolExecutor` spawns processes, bypassing the GIL for true parallelism.",
+            keywords: ["submit()", "Future", "map()", "as_completed()"]
+        },
+        // ── Performance ────────────────────────────────────────────────
+        {
+            tag: "Performance",
+            prompt: "How would you profile a Python application to find performance bottlenecks?",
+            answer: "Use `cProfile`/`profile` for function-level stats, `line_profiler` for line-level, `memory_profiler` for memory, and `perf` or `py-spy` for low-overhead sampling in production.",
+            keywords: ["cProfile", "line_profiler", "py-spy", "Hotspot"]
+        },
+        {
+            tag: "Performance",
+            prompt: "What are some Python-specific techniques to speed up CPU-intensive code?",
+            answer: "Use NumPy vectorization, Cython/C extensions, `multiprocessing` to bypass the GIL, PyPy JIT, or Numba for numerical code.",
+            keywords: ["NumPy", "Cython", "PyPy", "Numba", "Vectorization"]
+        },
+        {
+            tag: "Performance",
+            prompt: "Explain string interning in Python and its performance implications.",
+            answer: "Python interns small integers (-5 to 256) and identifier-like strings automatically. Interned strings share identity, making `is` comparison O(1). Use `sys.intern()` explicitly for repeated strings.",
+            keywords: ["sys.intern", "id()", "Memory deduplication", "Hash comparison"]
+        },
+        {
+            tag: "Performance",
+            prompt: "When would you use `__slots__` and what are the trade-offs?",
+            answer: "Use `__slots__` when creating millions of small objects to reduce memory by ~40-50%. Trade-offs: no `__dict__`, no dynamic attributes, trickier multiple inheritance.",
+            keywords: ["Memory", "No __dict__", "Fixed attributes", "Benchmark"]
+        },
+        {
+            tag: "Performance",
+            prompt: "How do `lru_cache` and `cache` (from `functools`) work? What are their limitations?",
+            answer: "`lru_cache(maxsize=N)` memoizes up to N calls using a doubly-linked list + dict. `cache` is unbounded. Limitations: functions must have hashable arguments; cached results are never garbage-collected.",
+            keywords: ["Memoization", "Hashable args", "Cache invalidation", "functools"]
+        },
+        // ── Testing ────────────────────────────────────────────────────
+        {
+            tag: "Testing",
+            prompt: "What is the difference between `unittest.mock.patch`, `patch.object`, and `MagicMock`?",
+            answer: "`patch` replaces a named target in a module. `patch.object` replaces an attribute on a specific object. `MagicMock` is a mock with pre-configured magic methods.",
+            keywords: ["Dependency injection", "Side effects", "assert_called_with", "spec="]
+        },
+        {
+            tag: "Testing",
+            prompt: "Explain pytest fixtures. How do fixture scopes affect test isolation?",
+            answer: "Fixtures provide reusable setup/teardown via `@pytest.fixture`. Scopes: `function` (default, one per test), `class`, `module`, `session` (shared). Wider scope = less isolation.",
+            keywords: ["@pytest.fixture", "yield fixture", "Scope", "conftest.py"]
+        },
+        {
+            tag: "Testing",
+            prompt: "What is property-based testing? How does `hypothesis` differ from example-based tests?",
+            answer: "Property-based testing defines invariants; `hypothesis` generates many random inputs to find edge cases automatically, unlike hand-written examples that only test known cases.",
+            keywords: ["hypothesis", "@given", "Strategies", "Shrinking"]
+        },
+        {
+            tag: "Testing",
+            prompt: "How do you test code that makes HTTP requests without hitting real endpoints?",
+            answer: "Use `unittest.mock.patch` on the requests session, `responses` library to intercept requests, or `pytest-httpserver` for a real local server. `httpretty` also intercepts at the socket level.",
+            keywords: ["responses library", "MagicMock", "Network isolation", "VCR cassette"]
+        },
+        {
+            tag: "Testing",
+            prompt: "What is test coverage, and when is 100% coverage misleading?",
+            answer: "Coverage measures which lines/branches were executed during tests. 100% line coverage can still miss logical bugs, wrong conditions, or integration issues — it's a floor, not a ceiling.",
+            keywords: ["coverage.py", "Branch coverage", "Mutation testing", "Test quality"]
+        },
+        // ── Algorithms ─────────────────────────────────────────────────
+        {
+            tag: "Algorithms",
+            prompt: "Implement a function to find all duplicate elements in a list in O(n) time.",
+            answer: "Use a `set` to track seen items and a second set (or list) for duplicates: iterate once, add to `seen`; if already in `seen`, add to `duplicates`.",
+            keywords: ["Set lookup O(1)", "Single pass", "Hash set", "Space trade-off"]
+        },
+        {
+            tag: "Algorithms",
+            prompt: "Write a Python function to check if a string is a palindrome, handling Unicode correctly.",
+            answer: "Normalize with `unicodedata.normalize('NFC', s)`, strip non-alphanumeric chars, lowercase, then compare `s == s[::-1]`.",
+            keywords: ["Unicode normalization", "Slicing", "Two-pointer", "Edge cases"]
+        },
+        {
+            tag: "Algorithms",
+            prompt: "Explain the difference between BFS and DFS. Implement BFS on a graph in Python.",
+            answer: "BFS uses a queue (`collections.deque`) and explores level by level — good for shortest paths. DFS uses a stack (or recursion) and explores depth first.",
+            keywords: ["collections.deque", "Visited set", "Level-order", "Shortest path"]
+        },
+        {
+            tag: "Algorithms",
+            prompt: "What is dynamic programming? Solve the coin change problem in Python.",
+            answer: "DP solves problems by breaking them into overlapping subproblems and caching results. Coin change: `dp[i] = min(dp[i], dp[i - coin] + 1)` for each coin, bottom-up.",
+            keywords: ["Memoization vs tabulation", "Bottom-up", "Subproblem", "Optimal substructure"]
+        },
+        {
+            tag: "Algorithms",
+            prompt: "Implement a LRU Cache class in Python without using `functools.lru_cache`.",
+            answer: "Use `collections.OrderedDict`: on get, move key to end (most recently used). On put, evict the first key (least recently used) when over capacity.",
+            keywords: ["OrderedDict", "move_to_end", "O(1) operations", "Capacity eviction"]
+        },
+        {
+            tag: "Algorithms",
+            prompt: "How would you flatten an arbitrarily nested list in Python?",
+            answer: "Use recursion or a stack: check if each element is a list (`isinstance(item, list)`); if so, recurse/push; otherwise yield it. Generators make this memory efficient.",
+            keywords: ["isinstance", "Recursion", "Generator", "yield from"]
+        },
+        {
+            tag: "Algorithms",
+            prompt: "Write a Python solution to find the two numbers in a list that sum to a target. What is the complexity?",
+            answer: "Use a hash set: for each num, check if `target - num` is in the set, then add `num` to the set. O(n) time and O(n) space.",
+            keywords: ["Hash set", "One-pass O(n)", "Complement lookup", "Two-sum"]
+        },
+        {
+            tag: "Algorithms",
+            prompt: "Explain Python's `sorted()` and `list.sort()`. What sorting algorithm does Python use and why?",
+            answer: "Both use Timsort — a hybrid merge/insertion sort stable in O(n log n) worst case and O(n) best case (nearly sorted data). `sorted()` returns a new list; `.sort()` sorts in-place.",
+            keywords: ["Timsort", "Stable sort", "key= parameter", "In-place vs copy"]
+        },
+        {
+            tag: "Algorithms",
+            prompt: "How would you detect a cycle in a singly linked list using Python?",
+            answer: "Floyd's cycle detection: use two pointers `slow` and `fast`. Move `slow` one step, `fast` two steps. If they meet, a cycle exists. O(n) time, O(1) space.",
+            keywords: ["Floyd's algorithm", "Two-pointer", "O(1) space", "Tortoise and hare"]
+        }
+    ];
+
+    function renderCards(data) {
+        const container = document.getElementById('questionsContainer');
+        document.getElementById('stats').textContent = `Scenarios: ${data.length}`;
+        container.innerHTML = data.map(item => `
+            <div class="question-card bg-white rounded-3xl border border-slate-200 shadow-sm p-8 card-enter transition-all hover:border-purple-300">
+                <div class="flex justify-between items-start mb-6">
+                    <span class="px-3 py-1 bg-purple-100 text-purple-700 text-[10px] font-black uppercase rounded-full tracking-wider">${item.tag}</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 mb-8 leading-relaxed italic text-purple-900 underline decoration-purple-100 decoration-4">
+                    "${item.prompt}"
+                </h3>
+
+                <button onclick="toggleAnswer(this)" class="group flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest hover:text-purple-600 transition-colors">
+                    <span>Show Evaluator Checklist</span>
+                    <svg class="w-4 h-4 transition-transform group-hover:translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+
+                <div class="details-hidden mt-8 p-6 bg-slate-50 rounded-2xl border-t-4 border-purple-500">
+                    <div class="mb-6">
+                        <div class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-2">Ideal Technical Solution:</div>
+                        <div class="text-lg font-bold text-slate-800">${item.answer}</div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Listen for these keywords:</div>
+                        <div class="flex flex-wrap gap-2">
+                            ${item.keywords.map(k => `<span class="bg-white border border-slate-200 text-slate-700 text-[10px] px-3 py-1.5 rounded-lg font-bold shadow-sm italic"># ${k}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function toggleAnswer(btn) {
+        const div = btn.nextElementSibling;
+        const isHidden = div.classList.contains('details-hidden');
+        div.classList.toggle('details-hidden');
+        btn.querySelector('span').innerText = isHidden ? "Hide Checklist" : "Show Evaluator Checklist";
+    }
+
+    function filterTag(tag) {
+        document.querySelectorAll('#tagList button').forEach(b => b.classList.remove('active-tag'));
+        event.currentTarget.classList.add('active-tag');
+        if (tag === 'all') {
+            renderCards(pythonData);
+        } else {
+            const filtered = pythonData.filter(d => d.tag === tag);
+            renderCards(filtered);
+        }
+    }
+
+    function searchContent() {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = pythonData.filter(d =>
+            d.prompt.toLowerCase().includes(term) ||
+            d.answer.toLowerCase().includes(term) ||
+            d.tag.toLowerCase().includes(term)
+        );
+        renderCards(filtered);
+    }
+
+    renderCards(pythonData);
+</script>
+</body>
+</html>
