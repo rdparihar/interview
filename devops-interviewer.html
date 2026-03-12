@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOps Interviewer Guide | All-In-One</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .active-tag { background-color: #16a34a !important; color: white !important; }
+        .details-hidden { display: none; }
+        .card-enter { animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-slate-50 flex min-h-screen">
+
+    <aside class="w-64 bg-slate-900 text-slate-300 p-6 sticky top-0 h-screen overflow-y-auto hidden lg:block">
+        <div class="mb-8">
+            <a href="index.html" class="text-green-400 font-bold hover:text-white transition-all text-sm uppercase">← Dashboard</a>
+        </div>
+        <div class="mb-10 font-black text-2xl tracking-tighter text-white">DEVOPS <span class="text-green-500">HIRE</span></div>
+        
+        <h2 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Interview Domains</h2>
+        <nav class="space-y-2" id="tagList">
+            <button onclick="filterTag('all', this)" class="active-tag w-full text-left px-4 py-2 rounded-xl text-sm font-bold transition-all">All Scenarios</button>
+            <button onclick="filterTag('Kubernetes', this)" class="w-full text-left px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all">Kubernetes</button>
+            <button onclick="filterTag('Helm', this)" class="w-full text-left px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all">Helm</button>
+            <button onclick="filterTag('Jenkins', this)" class="w-full text-left px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all">Jenkins / CI/CD</button>
+            <button onclick="filterTag('Docker', this)" class="w-full text-left px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all">Docker</button>
+            <button onclick="filterTag('Linux', this)" class="w-full text-left px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all">Linux</button>
+            <button onclick="filterTag('Git', this)" class="w-full text-left px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all">Git</button>
+            <button onclick="filterTag('Terraform', this)" class="w-full text-left px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all">Terraform</button>
+            <button onclick="filterTag('AWS', this)" class="w-full text-left px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all">AWS / Cloud</button>
+            <button onclick="filterTag('Monitoring', this)" class="w-full text-left px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all">Monitoring</button>
+            <button onclick="filterTag('ProdOps', this)" class="w-full text-left px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all">Production Issues</button>
+            <button onclick="filterTag('Behavioral', this)" class="w-full text-left px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all">HM / Behavioral</button>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-6 md:p-12">
+        <header class="mb-10 flex justify-between items-end">
+            <div>
+                <h1 class="text-4xl font-black text-slate-900 tracking-tight">DevOps <span class="text-green-600">Script</span></h1>
+                <p class="text-slate-500 font-medium italic mt-2 text-lg">Drive practical scenarios. Evaluate depth and troubleshooting.</p>
+            </div>
+            <div id="stats" class="bg-green-100 text-green-700 px-4 py-2 rounded-full font-black text-xs uppercase tracking-widest">
+                Scenarios: 107
+            </div>
+        </header>
+
+        <div class="relative mb-10">
+            <input type="text" id="searchInput" onkeyup="searchContent()"
+                placeholder="Find by tool or problem (e.g. 'CrashLoopBackOff', 'state file', 'auto scaling')..."
+                class="w-full p-5 pl-14 rounded-2xl border-2 border-slate-200 shadow-sm focus:border-green-500 focus:outline-none bg-white text-lg transition-all">
+            <svg class="w-6 h-6 absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+
+        <div id="questionsContainer" class="space-y-6"></div>
+    </main>
+
+<script>
+    const devopsData = [
+        {
+            tag: "Kubernetes",
+            prompt: "A pod is restarting frequently in production. Walk me through your root-cause workflow.",
+            answer: "Check pod events and describe output, inspect logs (current and previous), verify liveness/readiness probes, review resource limits for OOMKilled, and correlate with recent deploy/config changes.",
+            keywords: ["kubectl describe", "kubectl logs --previous", "Probe failures", "OOMKilled", "Events timeline"]
+        },
+        {
+            tag: "Kubernetes",
+            prompt: "A Deployment is stuck in Progressing state. How do you troubleshoot it?",
+            answer: "Inspect rollout status, compare desired vs available replicas, check pod scheduling constraints, image pull issues, failing probes, and deployment strategy settings.",
+            keywords: ["kubectl rollout status", "ReplicaSet", "ImagePullBackOff", "Readiness", "maxUnavailable"]
+        },
+        {
+            tag: "Kubernetes",
+            prompt: "How do you debug a CrashLoopBackOff issue quickly?",
+            answer: "Use describe and previous logs, verify startup commands and env vars, inspect probe settings, and check recent config/image changes.",
+            keywords: ["CrashLoopBackOff", "kubectl logs --previous", "Startup command", "Probes", "Recent changes"]
+        },
+        {
+            tag: "Kubernetes",
+            prompt: "How do you check which pods are consuming high memory or CPU?",
+            answer: "Use metrics-server with kubectl top pod/node, then correlate with limits/requests and app-level telemetry.",
+            keywords: ["kubectl top", "metrics-server", "Limits/requests", "Node pressure", "Telemetry"]
+        },
+        {
+            tag: "Kubernetes",
+            prompt: "Your application is not accessible through a Kubernetes Service. What do you validate first?",
+            answer: "Validate selector labels, endpoints population, targetPort/containerPort mapping, service type, and ingress/network policies that may block traffic.",
+            keywords: ["Endpoints", "Selectors", "targetPort", "Ingress", "NetworkPolicy"]
+        },
+        {
+            tag: "Kubernetes",
+            prompt: "How do you handle failed DaemonSet pods?",
+            answer: "Check node selectors/taints, image pull permissions, daemonset events, host-level dependencies, and tolerate temporary node pressure conditions.",
+            keywords: ["DaemonSet", "Taints", "NodeSelector", "Events", "Host dependencies"]
+        },
+        {
+            tag: "Helm",
+            prompt: "How do you manage multi-environment deployments using Helm?",
+            answer: "Use a base chart with environment-specific values files, pass overrides with --values/--set, and keep release naming and namespaces consistent per environment.",
+            keywords: ["values.yaml", "-f values-prod.yaml", "Release naming", "Namespaces", "Override strategy"]
+        },
+        {
+            tag: "Helm",
+            prompt: "What are values.yaml files and how do you override them in release time?",
+            answer: "values.yaml stores defaults; override with additional values files and --set flags in CI for environment-specific controls.",
+            keywords: ["values.yaml", "--set", "Override", "Environment config", "Helm upgrade"]
+        },
+        {
+            tag: "Helm",
+            prompt: "A Helm release failed in CI. What are your debugging steps?",
+            answer: "Run helm status and helm history, inspect rendered manifests via helm template, check Kubernetes events/logs, and verify chart dependencies and value substitutions.",
+            keywords: ["helm status", "helm history", "helm template", "Chart dependencies", "Rendered manifests"]
+        },
+        {
+            tag: "Helm",
+            prompt: "Explain the difference between Helm chart, release, and repository.",
+            answer: "Chart is the package template, release is a deployed chart instance in cluster, and repository is where versioned charts are published.",
+            keywords: ["Chart", "Release", "Repository", "Versioning", "Deployment artifact"]
+        },
+        {
+            tag: "Helm",
+            prompt: "Explain the folder structure of a basic Helm chart and common deploy commands.",
+            answer: "Include Chart.yaml, values.yaml, templates, and optionally charts; use helm lint, helm template, helm install, and helm upgrade --install.",
+            keywords: ["Chart.yaml", "templates", "helm lint", "helm install", "helm upgrade --install"]
+        },
+        {
+            tag: "Jenkins",
+            prompt: "Why would you choose Declarative Pipeline over Scripted Pipeline?",
+            answer: "Declarative improves readability, governance, and maintainability with structured stages and built-in directives; Scripted is more flexible but harder to standardize at scale.",
+            keywords: ["Readability", "Governance", "Pipeline as code", "Maintainability", "Shared standards"]
+        },
+        {
+            tag: "Jenkins",
+            prompt: "Pipeline runs but build artifacts are not generated. Where do you investigate?",
+            answer: "Validate workspace path, build tool command output, artifact archiving patterns, permissions, and conditional stage logic that may have skipped build steps.",
+            keywords: ["archiveArtifacts", "Workspace", "Build logs", "Stage conditions", "Permissions"]
+        },
+        {
+            tag: "Jenkins",
+            prompt: "How do you build, containerize, push, and deploy using Jenkins in one flow?",
+            answer: "Create stages for checkout, test/build, image build, vulnerability scan, registry push, and deployment with approvals and rollback hooks.",
+            keywords: ["Stages", "Docker build", "Image scan", "Registry push", "Deploy and rollback"]
+        },
+        {
+            tag: "Jenkins",
+            prompt: "What is the role of webhooks in CI/CD and how do you configure them?",
+            answer: "Webhooks trigger pipelines immediately on repository events, reducing polling delays and aligning build context with commit metadata.",
+            keywords: ["Webhook", "Event-driven", "GitHub/GitLab", "Fast trigger", "Build context"]
+        },
+        {
+            tag: "Jenkins",
+            prompt: "How do you use Jenkins shared libraries in enterprise pipelines?",
+            answer: "Centralize reusable pipeline logic in versioned libraries and load with @Library; expose approved steps for consistent standards.",
+            keywords: ["@Library", "Shared library", "Reusable steps", "Versioned", "Governance"]
+        },
+        {
+            tag: "Jenkins",
+            prompt: "How do you trigger Jenkins on code push and handle secrets securely?",
+            answer: "Use SCM webhooks for trigger and credentials store or external secret manager bindings for masked secret injection.",
+            keywords: ["SCM webhook", "Credentials store", "Secret manager", "Masked logs", "Least privilege"]
+        },
+        {
+            tag: "Jenkins",
+            prompt: "How do you pass parameters between pipeline stages?",
+            answer: "Use environment variables, stash/unstash artifacts, and metadata files while keeping values explicit and auditable.",
+            keywords: ["environment", "stash/unstash", "Artifacts", "Parameters", "Auditability"]
+        },
+        {
+            tag: "Jenkins",
+            prompt: "How do you integrate code quality and security checks in Jenkins before deployment?",
+            answer: "Add stages for unit tests, static analysis, dependency/image scans, and quality gates; fail-fast before deploy when thresholds are not met.",
+            keywords: ["SonarQube", "SAST", "Dependency scan", "Quality gate", "Fail fast"]
+        },
+        {
+            tag: "Jenkins",
+            prompt: "Why would a CI/CD pipeline fail randomly at different stages?",
+            answer: "Look for environment drift on agents, flaky dependencies, network instability, shared workspace conflicts, and nondeterministic tests.",
+            keywords: ["Agent drift", "Flaky tests", "Dependency instability", "Workspace isolation", "Retries"]
+        },
+        {
+            tag: "Docker",
+            prompt: "What is the difference between a Docker image and a container?",
+            answer: "Image is an immutable template; container is a running, isolated process instance created from that image.",
+            keywords: ["Immutable image", "Runtime instance", "Layered filesystem", "Container lifecycle", "Isolation"]
+        },
+        {
+            tag: "Docker",
+            prompt: "How do you persist data across container restarts?",
+            answer: "Use named volumes or bind mounts and keep mutable state outside the container filesystem.",
+            keywords: ["Volumes", "Bind mounts", "Stateful data", "Persistence", "Container restart"]
+        },
+        {
+            tag: "Docker",
+            prompt: "What is the use of docker-compose in a development workflow?",
+            answer: "It defines multi-container services, networking, and dependencies in one file for repeatable local and test environments.",
+            keywords: ["docker-compose", "Multi-service", "Repeatable env", "Dependencies", "Local stack"]
+        },
+        {
+            tag: "Docker",
+            prompt: "How do you inspect logs of a specific container and troubleshoot issues?",
+            answer: "Use docker logs with timestamps/follow mode, check exit codes, and correlate with orchestrator or host metrics.",
+            keywords: ["docker logs", "Exit codes", "Follow mode", "Timestamps", "Correlation"]
+        },
+        {
+            tag: "Docker",
+            prompt: "How do you expose a containerized service to external users?",
+            answer: "Publish ports with runtime mapping, secure ingress through reverse proxy/load balancer, and enforce firewall and TLS controls.",
+            keywords: ["Port mapping", "Reverse proxy", "Load balancer", "TLS", "Firewall"]
+        },
+        {
+            tag: "Docker",
+            prompt: "What are key stages in Docker image build and why use ENTRYPOINT plus CMD?",
+            answer: "Use deterministic multi-stage builds to reduce image size; ENTRYPOINT sets executable and CMD provides default arguments.",
+            keywords: ["Multi-stage build", "ENTRYPOINT", "CMD", "Smaller image", "Deterministic"]
+        },
+        {
+            tag: "Docker",
+            prompt: "How do you pass environment variables during Docker build commands?",
+            answer: "Use build arguments for build-time values and runtime environment variables for execution-time config; avoid hardcoding secrets.",
+            keywords: ["ARG", "ENV", "Build-time", "Runtime config", "Secret hygiene"]
+        },
+        {
+            tag: "Docker",
+            prompt: "How do you troubleshoot container DNS resolution failures?",
+            answer: "Inspect resolver config, network policy/firewall rules, service discovery endpoints, and DNS server health within cluster or host.",
+            keywords: ["DNS", "resolv.conf", "Service discovery", "Network policy", "CoreDNS"]
+        },
+        {
+            tag: "Docker",
+            prompt: "How do you enforce policy as code for Docker security?",
+            answer: "Gate builds with policy engines and signed images, block privileged settings, and enforce base-image and vulnerability policies in CI.",
+            keywords: ["Policy as code", "Image signing", "Privileged controls", "Vulnerability gating", "Compliance"]
+        },
+        {
+            tag: "Docker",
+            prompt: "How do you reduce large Docker image sizes in CI?",
+            answer: "Use minimal base images, multi-stage builds, dependency pruning, and ordered layers to maximize cache reuse.",
+            keywords: ["Slim base", "Multi-stage", "Layer caching", "Prune dependencies", "Smaller attack surface"]
+        },
+        {
+            tag: "Linux",
+            prompt: "How do you check running processes and identify a high-memory process in Linux?",
+            answer: "Use ps/top/htop with sorting on memory and validate process tree/context before taking corrective action.",
+            keywords: ["ps", "top", "htop", "sort by memory", "pstree"]
+        },
+        {
+            tag: "Linux",
+            prompt: "What is the difference between top, htop, and ps?",
+            answer: "top and htop are interactive monitors while ps is snapshot output suited for scripting and automation.",
+            keywords: ["Interactive", "Snapshot", "Scripting", "Monitoring", "Process views"]
+        },
+        {
+            tag: "Linux",
+            prompt: "How would you schedule a cron job to run every 15 minutes?",
+            answer: "Use a crontab entry with 15-minute interval syntax and verify execution through cron logs and command output handling.",
+            keywords: ["crontab", "*/15", "Scheduling", "Cron logs", "Automation"]
+        },
+        {
+            tag: "Linux",
+            prompt: "What is the difference between hard links and soft links?",
+            answer: "Hard links reference inode data directly; symlinks reference a path and can break when target path changes.",
+            keywords: ["inode", "symlink", "Filesystem", "Path reference", "Link behavior"]
+        },
+        {
+            tag: "Linux",
+            prompt: "Which Linux areas should DevOps engineers master first for production work?",
+            answer: "Prioritize process and service management, networking, permissions, logs, shell scripting, and system troubleshooting workflows.",
+            keywords: ["systemctl", "Networking", "Permissions", "Logs", "Shell scripting"]
+        },
+        {
+            tag: "Linux",
+            prompt: "Which system files are most important for user, privilege, and scheduler troubleshooting?",
+            answer: "Focus on passwd, group, shadow, sudoers, fstab, and crontab with strict change control and backup procedures.",
+            keywords: ["passwd", "shadow", "sudoers", "fstab", "crontab"]
+        },
+        {
+            tag: "Linux",
+            prompt: "How do you debug service outages using logs and systemd tools?",
+            answer: "Start with service status, then use journalctl and app logs in /var/log to build a timeline of failure causes.",
+            keywords: ["systemctl status", "journalctl", "/var/log", "Timeline", "Root cause"]
+        },
+        {
+            tag: "Linux",
+            prompt: "How do you monitor disk and filesystem usage to prevent incidents?",
+            answer: "Track df, du, lsblk, mount usage trends and automate cleanup policies for logs, temp files, and stale artifacts.",
+            keywords: ["df", "du", "lsblk", "mount", "Capacity planning"]
+        },
+        {
+            tag: "Linux",
+            prompt: "How do you secure SSH access for production hosts?",
+            answer: "Use key-based auth, hardened sshd settings, limited user access, MFA/bastion controls, and centralized audit logging.",
+            keywords: ["ssh keys", "sshd_config", "Bastion", "MFA", "Audit logging"]
+        },
+        {
+            tag: "Git",
+            prompt: "How do you resolve merge conflicts in a release branch safely?",
+            answer: "Reproduce locally, resolve by intent not blindly, run full test suite, and protect release branch with reviews and checks.",
+            keywords: ["Merge conflict", "Release branch", "Code review", "Regression tests", "Branch protection"]
+        },
+        {
+            tag: "Git",
+            prompt: "What is the difference between git pull, git fetch, and git clone?",
+            answer: "clone creates local repo, fetch updates remote refs, and pull fetches plus integrates changes into current branch.",
+            keywords: ["clone", "fetch", "pull", "Remote refs", "Integration"]
+        },
+        {
+            tag: "Git",
+            prompt: "When should you use git stash in day-to-day DevOps workflows?",
+            answer: "Use stash for short-lived local context switches when changes are not ready to commit but must be preserved.",
+            keywords: ["git stash", "Context switch", "Local changes", "Temporary", "WIP"]
+        },
+        {
+            tag: "Git",
+            prompt: "What does .gitignore do and what are common mistakes?",
+            answer: "It prevents tracking matching files; common mistakes are committing secrets first and expecting ignore to untrack existing files.",
+            keywords: [".gitignore", "Untracked files", "Secrets", "Repository hygiene", "Tracking behavior"]
+        },
+        {
+            tag: "Git",
+            prompt: "What is the practical difference between git rebase and git merge?",
+            answer: "Merge preserves branch history with merge commits; rebase rewrites commit base for cleaner linear history.",
+            keywords: ["rebase", "merge", "Linear history", "Merge commit", "History rewrite"]
+        },
+        {
+            tag: "Terraform",
+            prompt: "Terraform state in S3 was deleted accidentally. What is your recovery approach?",
+            answer: "Restore from versioned S3 object if enabled, verify lock table consistency, then reconcile real infrastructure with terraform import/state commands before next apply.",
+            keywords: ["S3 versioning", "State recovery", "DynamoDB lock", "terraform import", "Drift reconciliation"]
+        },
+        {
+            tag: "Terraform",
+            prompt: "How do you create 50 EC2 instances with different configurations using Terraform?",
+            answer: "Use map-driven variables with for_each and dynamic blocks, keeping reusable modules and validation rules for consistency.",
+            keywords: ["for_each", "dynamic blocks", "Maps", "Reusable modules", "Validation"]
+        },
+        {
+            tag: "Terraform",
+            prompt: "How would you design Terraform code for a VPC with all core components and an RDS database?",
+            answer: "Model network and database modules, isolate state, enforce subnet/security boundaries, and output integration points for app stacks.",
+            keywords: ["VPC module", "Subnets", "Route tables", "RDS", "Module outputs"]
+        },
+        {
+            tag: "Terraform",
+            prompt: "How do you provision different configs across dev/stage/prod safely?",
+            answer: "Use reusable modules with environment-specific variables/workspaces, separate state backends, policy checks, and controlled CI promotion.",
+            keywords: ["Modules", "Workspaces", "Remote backend", "Policy as code", "Promotion flow"]
+        },
+        {
+            tag: "Terraform",
+            prompt: "How does Terraform maintain state of managed resources?",
+            answer: "State maps configuration to real resources and enables planning diff; store remotely with locking and versioning for team safety.",
+            keywords: ["State file", "Resource mapping", "Remote backend", "Locking", "Versioning"]
+        },
+        {
+            tag: "Terraform",
+            prompt: "What are Terraform modules and when do you split them?",
+            answer: "Modules package reusable infrastructure patterns; split by lifecycle boundaries and team ownership to avoid tight coupling.",
+            keywords: ["Modules", "Reuse", "Boundaries", "Ownership", "Composition"]
+        },
+        {
+            tag: "Terraform",
+            prompt: "How do you manage sensitive variables in Terraform?",
+            answer: "Use sensitive inputs, secret managers, encrypted backends, and never expose secrets in plaintext logs or state outputs.",
+            keywords: ["Sensitive", "Secret manager", "Encrypted backend", "No plaintext", "State hygiene"]
+        },
+        {
+            tag: "Terraform",
+            prompt: "What is the purpose of terraform validate and terraform fmt in CI?",
+            answer: "validate catches config errors early while fmt enforces consistent code style for reviewability and automation.",
+            keywords: ["terraform validate", "terraform fmt", "Static checks", "Consistency", "CI quality"]
+        },
+        {
+            tag: "Terraform",
+            prompt: "Apply succeeded but behavior is wrong. How do you debug quickly?",
+            answer: "Review state and outputs, inspect plan diff in detail, verify provider/resource arguments, and compare against actual cloud resource settings for drift or defaults.",
+            keywords: ["terraform plan", "terraform state show", "Outputs", "Provider defaults", "Drift"]
+        },
+        {
+            tag: "Terraform",
+            prompt: "How do you run Terraform safely in CI/CD pipelines?",
+            answer: "Use plan-then-approve workflows, isolated service roles, remote state locking, policy checks, and serialized apply on shared state.",
+            keywords: ["Plan approval", "Least privilege role", "Remote state", "Policy checks", "Serialized apply"]
+        },
+        {
+            tag: "Terraform",
+            prompt: "Your Terraform state file is getting too large. How do you manage it?",
+            answer: "Split stacks by domain/lifecycle, reduce monolithic modules, archive stale resources, and keep state focused per deployment boundary.",
+            keywords: ["State split", "Stack boundaries", "Monolith reduction", "Lifecycle isolation", "Performance"]
+        },
+        {
+            tag: "Terraform",
+            prompt: "How would you structure Terraform for provisioning in 10 AWS regions simultaneously?",
+            answer: "Use region-parameterized modules with separate state per region and orchestrated CI fan-out with guarded concurrency.",
+            keywords: ["Multi-region", "Parameterized modules", "State per region", "Fan-out CI", "Concurrency controls"]
+        },
+        {
+            tag: "Terraform",
+            prompt: "A production apply failed halfway. Some resources exist, others do not. How do you recover?",
+            answer: "Stop further applies, reconcile state with actual resources, import or taint selectively, then re-run controlled plan and apply.",
+            keywords: ["Partial apply", "Reconcile", "terraform import", "taint/replace", "Controlled retry"]
+        },
+        {
+            tag: "AWS",
+            prompt: "EC2 instance is unreachable over SSH. What is your triage checklist?",
+            answer: "Check instance/system status checks, security groups/NACL/route tables, key pair and username, SSM Session Manager access, and OS-level SSH daemon logs.",
+            keywords: ["Status checks", "Security Group", "NACL", "SSM", "sshd logs"]
+        },
+        {
+            tag: "AWS",
+            prompt: "How do you implement auto scaling for unpredictable traffic while controlling cost?",
+            answer: "Use target tracking with meaningful metrics, mixed instance policies or Spot where safe, warm pools if needed, and scheduled scaling for known peaks.",
+            keywords: ["Target tracking", "Mixed instances", "Spot", "Scheduled scaling", "Cost optimization"]
+        },
+        {
+            tag: "AWS",
+            prompt: "ALB vs NLB: when would you choose each in a real system?",
+            answer: "Use ALB for HTTP/HTTPS with L7 routing features; use NLB for ultra-low latency, static IP, and TCP/UDP pass-through at L4.",
+            keywords: ["Layer 7", "Layer 4", "Host/path routing", "Static IP", "TCP/UDP"]
+        },
+        {
+            tag: "AWS",
+            prompt: "What are the setup steps for S3 cross-region replication?",
+            answer: "Enable versioning on both buckets, configure replication rules and IAM role, then validate replication metrics and object ownership.",
+            keywords: ["Versioning", "Replication rule", "IAM role", "Destination bucket", "Validation"]
+        },
+        {
+            tag: "AWS",
+            prompt: "How do you troubleshoot high latency in API Gateway after a deployment?",
+            answer: "Compare gateway and integration latency, inspect backend traces, review throttling limits, and validate caching and cold start behavior.",
+            keywords: ["Integration latency", "Tracing", "Throttling", "Caching", "Cold starts"]
+        },
+        {
+            tag: "AWS",
+            prompt: "How do you reduce RDS cost without downtime risk?",
+            answer: "Right-size instance/storage, tune autoscaling and retention, optimize queries, and use read replicas or class changes in maintenance windows.",
+            keywords: ["Right sizing", "Storage tuning", "Read replicas", "Maintenance window", "Cost optimization"]
+        },
+        {
+            tag: "AWS",
+            prompt: "How do you secure VPC workloads at scale?",
+            answer: "Layer controls: least-privilege IAM, segmented subnets, SG baselines, NACL controls, endpoint policies, centralized logging, and continuous config/compliance checks.",
+            keywords: ["Least privilege", "Segmentation", "Security Groups", "VPC endpoints", "CloudTrail/Config"]
+        },
+        {
+            tag: "AWS",
+            prompt: "What is the difference between EBS, S3, and EFS and when do you choose each?",
+            answer: "EBS is block storage for single-instance workloads, S3 is object storage, and EFS is shared file storage across multiple instances.",
+            keywords: ["Block storage", "Object storage", "Shared file system", "Durability", "Use cases"]
+        },
+        {
+            tag: "AWS",
+            prompt: "How does an IAM policy differ from an IAM role?",
+            answer: "Policy defines permissions; role is an assumable identity that receives policies for temporary, scoped access.",
+            keywords: ["Permissions", "AssumeRole", "Temporary credentials", "Identity", "Least privilege"]
+        },
+        {
+            tag: "AWS",
+            prompt: "What is the difference between security groups and NACLs?",
+            answer: "Security groups are stateful instance-level controls, while NACLs are stateless subnet-level filters with ordered rules.",
+            keywords: ["Stateful", "Stateless", "Instance level", "Subnet level", "Rule order"]
+        },
+        {
+            tag: "AWS",
+            prompt: "How do you troubleshoot missing CloudWatch logs from ECS tasks?",
+            answer: "Verify task execution role permissions, awslogs log driver configuration, target log group/region, and network egress to CloudWatch.",
+            keywords: ["Execution role", "awslogs", "Log group", "Region", "Network egress"]
+        },
+        {
+            tag: "AWS",
+            prompt: "Why do Lambda functions time out randomly and how do you reduce it?",
+            answer: "Investigate cold starts, dependency latency, and VPC networking overhead; optimize initialization and set realistic timeout budgets.",
+            keywords: ["Timeout", "Cold start", "VPC latency", "Initialization", "Dependency latency"]
+        },
+        {
+            tag: "AWS",
+            prompt: "How do you design a highly available EC2 architecture across multiple AZs?",
+            answer: "Use multi-AZ subnets, load balancers, autoscaling groups, health checks, and stateless app design with resilient data tiers.",
+            keywords: ["Multi-AZ", "ALB", "Auto Scaling", "Health checks", "Stateless design"]
+        },
+        {
+            tag: "AWS",
+            prompt: "How would you migrate a running EC2 workload to another region with minimal downtime?",
+            answer: "Replicate data, pre-provision stack, cut traffic gradually with DNS or load balancer strategy, and keep rollback path ready.",
+            keywords: ["Cross-region", "Data replication", "Blue/green", "DNS cutover", "Rollback"]
+        },
+        {
+            tag: "AWS",
+            prompt: "How do you implement secure cross-account access for a partner organization?",
+            answer: "Use role assumption with external ID, scoped trust policies, least-privilege permissions, and monitoring via CloudTrail.",
+            keywords: ["Cross-account", "AssumeRole", "External ID", "Trust policy", "CloudTrail"]
+        },
+        {
+            tag: "AWS",
+            prompt: "How do you secure S3 data in transit and at rest for compliance?",
+            answer: "Enforce TLS-only access, enable encryption with KMS, tighten bucket policies, and monitor with audit and access analytics.",
+            keywords: ["TLS", "SSE-KMS", "Bucket policy", "Access logs", "Compliance"]
+        },
+        {
+            tag: "AWS",
+            prompt: "How do you connect an on-premises network securely to a VPC?",
+            answer: "Use site-to-site VPN for quick secure connectivity or Direct Connect for consistent high-throughput enterprise links.",
+            keywords: ["Site-to-site VPN", "Direct Connect", "BGP", "Hybrid network", "Secure connectivity"]
+        },
+        {
+            tag: "AWS",
+            prompt: "How do you deploy Lambda functions across multiple environments securely?",
+            answer: "Use separate accounts or stages, strict IAM roles, encrypted parameters/secrets, and automated promotion pipelines.",
+            keywords: ["Stages", "IAM roles", "Secrets", "Promotion pipeline", "Environment isolation"]
+        },
+        {
+            tag: "Monitoring",
+            prompt: "How do you set up custom metrics for Kubernetes pods?",
+            answer: "Expose app metrics, configure Prometheus scraping and relabeling, and create dashboards and alerts tied to SLOs.",
+            keywords: ["Custom metrics", "Prometheus scrape", "Relabeling", "SLO", "Dashboards"]
+        },
+        {
+            tag: "Monitoring",
+            prompt: "Grafana dashboards are missing data points. What do you inspect?",
+            answer: "Validate data source health, query time range and step, scrape target status in Prometheus, label cardinality issues, and retention/downsampling behavior.",
+            keywords: ["Prometheus targets", "Query step", "Time range", "Retention", "Cardinality"]
+        },
+        {
+            tag: "Monitoring",
+            prompt: "How do you create useful alerts for high CPU/memory in Kubernetes?",
+            answer: "Alert on sustained saturation with proper windows and severity levels, include namespace/pod context, and pair with runbook links to reduce noisy paging.",
+            keywords: ["Alert windows", "Severity", "Context labels", "Runbooks", "Noise reduction"]
+        },
+        {
+            tag: "Monitoring",
+            prompt: "How do you implement cluster-level monitoring with Prometheus for Kubernetes?",
+            answer: "Monitor nodes, control-plane components, workloads, and kube-state metrics with retention and federation strategy for scale.",
+            keywords: ["kube-state-metrics", "Node exporter", "Control plane", "Retention", "Federation"]
+        },
+        {
+            tag: "Monitoring",
+            prompt: "How do you integrate Prometheus Alertmanager with Slack for real-time notifications?",
+            answer: "Route alerts through Alertmanager receivers, define grouping/inhibition rules, and tune severity-based Slack channels.",
+            keywords: ["Alertmanager", "Slack receiver", "Grouping", "Inhibition", "Severity routing"]
+        },
+        {
+            tag: "Kubernetes",
+            prompt: "A node is NotReady. What are the first five checks you perform?",
+            answer: "Check kubelet status/logs, node conditions/events, disk/memory pressure, CNI/network health, and cloud provider instance health.",
+            keywords: ["kubelet", "Node conditions", "DiskPressure", "CNI", "Cloud instance health"]
+        },
+        {
+            tag: "Kubernetes",
+            prompt: "How do you perform health checks for pods and nodes in live environments?",
+            answer: "Use liveness/readiness/startup probes, node condition monitoring, and SLO-driven alerts with immediate incident response runbooks.",
+            keywords: ["Liveness", "Readiness", "Startup probes", "Node conditions", "SLO alerts"]
+        },
+        {
+            tag: "Kubernetes",
+            prompt: "Difference between Deployment and StatefulSet in real production choices?",
+            answer: "Deployment suits stateless replicated apps; StatefulSet provides stable identities and storage ordering for stateful systems.",
+            keywords: ["Stateless", "Stateful", "Stable network ID", "Ordered rollout", "Persistent storage"]
+        },
+        {
+            tag: "Kubernetes",
+            prompt: "What is a DaemonSet used for in Kubernetes clusters?",
+            answer: "It ensures one pod per node for node-level services like logging agents, monitoring exporters, and security collectors.",
+            keywords: ["One pod per node", "Logging agents", "Monitoring", "Node service", "Cluster operations"]
+        },
+        {
+            tag: "Kubernetes",
+            prompt: "What are ConfigMap vs Secret and how should they be handled?",
+            answer: "ConfigMap stores non-sensitive config; Secret stores sensitive data and should be encrypted, scoped, and rotated.",
+            keywords: ["ConfigMap", "Secret", "Encryption", "Rotation", "Least privilege"]
+        },
+        {
+            tag: "Kubernetes",
+            prompt: "What are taints and tolerations and when do you use them?",
+            answer: "Taints repel pods from nodes unless pods declare matching tolerations for workload placement control.",
+            keywords: ["Taints", "Tolerations", "Placement", "Scheduling", "Node isolation"]
+        },
+        {
+            tag: "Kubernetes",
+            prompt: "How do liveness and readiness probes differ in behavior?",
+            answer: "Liveness restarts unhealthy containers, readiness controls traffic routing by marking pod availability.",
+            keywords: ["Liveness", "Readiness", "Restart", "Traffic routing", "Health checks"]
+        },
+        {
+            tag: "Kubernetes",
+            prompt: "Your ingress controller crashes under heavy load. How do you stabilize it?",
+            answer: "Tune controller resources and limits, scale replicas, optimize upstream timeouts, and validate backend and network bottlenecks.",
+            keywords: ["Ingress controller", "Resource tuning", "Replica scaling", "Timeouts", "Bottleneck analysis"]
+        },
+        {
+            tag: "Kubernetes",
+            prompt: "An entire Kubernetes region goes down. How do you fail over workloads?",
+            answer: "Use multi-region architecture with replicated data, global traffic routing, tested DR runbooks, and controlled failback.",
+            keywords: ["Multi-region", "Failover", "Data replication", "Global routing", "DR runbook"]
+        },
+        {
+            tag: "Kubernetes",
+            prompt: "All pods in one namespace suddenly fail readiness checks. What do you inspect first?",
+            answer: "Check shared dependencies like ConfigMaps, Secrets, DNS/service connectivity, and recent rollout changes for that namespace.",
+            keywords: ["Namespace scope", "ConfigMap", "Secrets", "DNS", "Rollout changes"]
+        },
+        {
+            tag: "Kubernetes",
+            prompt: "Traffic surge hit the cluster and HPA cannot scale fast enough. How do you handle it?",
+            answer: "Tune HPA metrics and cooldowns, pre-scale capacity, use cluster autoscaler, and optimize app startup latency.",
+            keywords: ["HPA tuning", "Cluster autoscaler", "Pre-scaling", "Startup latency", "Traffic surge"]
+        },
+        {
+            tag: "Kubernetes",
+            prompt: "A node with critical workloads crashes permanently. How do you ensure recovery?",
+            answer: "Use multi-replica scheduling across nodes/zones, PodDisruptionBudgets, state recovery design, and automated replacement.",
+            keywords: ["Zone spread", "Replica strategy", "PDB", "Automated replacement", "State recovery"]
+        },
+        {
+            tag: "Kubernetes",
+            prompt: "A pod is stuck in ImagePullBackOff. What is your troubleshooting path?",
+            answer: "Verify image tag and registry access, check pull secrets and IAM permissions, inspect network reachability and rate limits.",
+            keywords: ["ImagePullBackOff", "imagePullSecrets", "Registry auth", "Permissions", "Network access"]
+        },
+        {
+            tag: "Kubernetes",
+            prompt: "How do you perform safe rolling updates and rollbacks?",
+            answer: "Use readiness gates, tune maxSurge/maxUnavailable, monitor rollout metrics, and keep rollback via previous ReplicaSet or versioned Helm release.",
+            keywords: ["maxSurge", "maxUnavailable", "Rollout monitor", "Rollback", "Versioned releases"]
+        },
+        {
+            tag: "Terraform",
+            prompt: "How do you handle Terraform state lock issues during team operations?",
+            answer: "Identify active operation owner, avoid force-unlock unless validated safe, and enforce serialized CI runs plus proper remote backend locking.",
+            keywords: ["State lock", "DynamoDB lock", "force-unlock caution", "Serialized runs", "Team workflow"]
+        },
+        {
+            tag: "Monitoring",
+            prompt: "Prometheus alerts are firing repeatedly with little value. How do you tune them?",
+            answer: "Adjust thresholds and for-duration windows, deduplicate related alerts, improve labels/annotations, and align severity with actionable runbooks.",
+            keywords: ["for duration", "Threshold tuning", "Deduplication", "Actionability", "Runbook mapping"]
+        },
+        {
+            tag: "Kubernetes",
+            prompt: "Persistent volume is not attaching to a pod. What path do you follow?",
+            answer: "Check PVC/PV binding state, storage class and access mode compatibility, CSI driver health, node affinity constraints, and cloud volume limits.",
+            keywords: ["PVC/PV", "StorageClass", "CSI", "AccessMode", "Volume limits"]
+        },
+        {
+            tag: "ProdOps",
+            prompt: "CPU or memory usage spikes suddenly on pods or EC2 instances. What do you do first?",
+            answer: "Contain impact with autoscaling and throttling, identify top offenders, and confirm whether leak, loop, or workload surge caused saturation.",
+            keywords: ["Saturation", "Top offenders", "Memory leak", "Traffic spike", "Containment"]
+        },
+        {
+            tag: "ProdOps",
+            prompt: "Disk usage reaches 100 percent unexpectedly. What is your incident response sequence?",
+            answer: "Locate fastest-growing paths, rotate or archive logs safely, free emergency space, then implement retention policies and alerts.",
+            keywords: ["Disk full", "Log rotation", "Retention policy", "Emergency cleanup", "Alerting"]
+        },
+        {
+            tag: "ProdOps",
+            prompt: "Application is not connecting to database in production. What is your checklist?",
+            answer: "Validate credentials, endpoint/DNS, security groups and routes, DB health, connection limits, and app-side timeout configuration.",
+            keywords: ["Credentials", "Network path", "DB health", "Connection limits", "Timeouts"]
+        },
+        {
+            tag: "ProdOps",
+            prompt: "Route 53 is not routing traffic as expected. How do you troubleshoot?",
+            answer: "Check hosted zone records, routing policy logic, health checks, TTL propagation, and client-side DNS caching behavior.",
+            keywords: ["Hosted zone", "Routing policy", "Health checks", "TTL", "DNS cache"]
+        },
+        {
+            tag: "ProdOps",
+            prompt: "Load balancer shows unhealthy targets. What are the most likely causes?",
+            answer: "Wrong health path or port, app startup lag, security controls blocking checks, or target not listening on configured endpoint.",
+            keywords: ["Health check path", "Port mismatch", "Startup delay", "Security rules", "Target health"]
+        },
+        {
+            tag: "ProdOps",
+            prompt: "CI/CD pipeline is not deploying to production automatically. What blocks do you check?",
+            answer: "Verify approval gates, credentials and permissions, environment conditions, branch policies, and failed downstream deployment jobs.",
+            keywords: ["Approval gate", "Permissions", "Branch policy", "Deployment job", "Environment condition"]
+        },
+        {
+            tag: "ProdOps",
+            prompt: "Infrastructure cost increased unexpectedly this month. How do you investigate?",
+            answer: "Break down by service and tag, identify idle or orphaned resources, validate scaling behavior, and add budgets with anomaly alerts.",
+            keywords: ["Cost explorer", "Tagging", "Idle resources", "Orphaned volumes", "Budget alerts"]
+        },
+        {
+            tag: "Behavioral",
+            prompt: "Describe your key project experiences and how they map to this role.",
+            answer: "Highlight scale, ownership, measurable outcomes, and hard production problems solved with clear business impact.",
+            keywords: ["Ownership", "Impact", "Scale", "Outcomes", "Relevance"]
+        },
+        {
+            tag: "Behavioral",
+            prompt: "What are your day-to-day responsibilities in your current DevOps role?",
+            answer: "Explain delivery, reliability, observability, automation, and collaboration responsibilities across development and operations.",
+            keywords: ["CI/CD", "Reliability", "Automation", "Monitoring", "Collaboration"]
+        },
+        {
+            tag: "Behavioral",
+            prompt: "How do you handle teamwork and culture-fit situations under pressure?",
+            answer: "Show communication clarity, ownership, incident composure, and constructive conflict resolution with post-incident learning.",
+            keywords: ["Communication", "Ownership", "Incident response", "Conflict resolution", "Retrospective"]
+        }
+    ];
+
+    function renderCards(data) {
+        const container = document.getElementById('questionsContainer');
+        const stats = document.getElementById('stats');
+        stats.innerText = `Scenarios: ${data.length}`;
+
+        container.innerHTML = data.map(item => `
+            <div class="question-card bg-white rounded-3xl border border-slate-200 shadow-sm p-8 card-enter transition-all hover:border-green-300">
+                <div class="flex justify-between items-start mb-6">
+                    <span class="px-3 py-1 bg-green-100 text-green-700 text-[10px] font-black uppercase rounded-full tracking-wider">${item.tag}</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 mb-8 leading-relaxed italic text-green-900 underline decoration-green-100 decoration-4">
+                    "${item.prompt}"
+                </h3>
+
+                <button onclick="toggleAnswer(this)" class="group flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest hover:text-green-600 transition-colors">
+                    <span>Show Evaluator Checklist</span>
+                    <svg class="w-4 h-4 transition-transform group-hover:translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+
+                <div class="details-hidden mt-8 p-6 bg-slate-50 rounded-2xl border-t-4 border-green-500">
+                    <div class="mb-6">
+                        <div class="text-[10px] text-emerald-600 uppercase tracking-widest mb-2 font-black">Ideal Technical Direction:</div>
+                        <div class="text-lg font-bold text-slate-800">${item.answer}</div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Listen for these keywords:</div>
+                        <div class="flex flex-wrap gap-2">
+                            ${item.keywords.map(k => `<span class="bg-white border border-slate-200 text-slate-700 text-[10px] px-3 py-1.5 rounded-lg font-bold shadow-sm italic"># ${k}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function toggleAnswer(btn) {
+        const div = btn.nextElementSibling;
+        const isHidden = div.classList.contains('details-hidden');
+        div.classList.toggle('details-hidden');
+        btn.querySelector('span').innerText = isHidden ? "Hide Checklist" : "Show Evaluator Checklist";
+    }
+
+    function setActiveButton(buttonEl) {
+        document.querySelectorAll('#tagList button').forEach(b => b.classList.remove('active-tag'));
+        buttonEl.classList.add('active-tag');
+    }
+
+    function filterTag(tag, buttonEl) {
+        if (buttonEl) {
+            setActiveButton(buttonEl);
+        }
+        if (tag === 'all') {
+            renderCards(devopsData);
+        } else {
+            const filtered = devopsData.filter(d => d.tag === tag);
+            renderCards(filtered);
+        }
+    }
+
+    function searchContent() {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = devopsData.filter(d =>
+            d.prompt.toLowerCase().includes(term) ||
+            d.answer.toLowerCase().includes(term) ||
+            d.tag.toLowerCase().includes(term) ||
+            d.keywords.join(' ').toLowerCase().includes(term)
+        );
+
+        document.querySelectorAll('#tagList button').forEach(b => b.classList.remove('active-tag'));
+        renderCards(filtered);
+    }
+
+    renderCards(devopsData);
+</script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+[
+  {
+    "id": 1,
+    "tag": "Storage",
+    "prompt": "Scenario: We collect 500GB daily across global sites. We need to aggregate this into one S3 bucket fast with minimal management. What's your proposal?",
+    "idealAnswer": "S3 Transfer Acceleration + Multipart Uploads.",
+    "keywords": ["Edge Locations", "AWS Backbone", "Parallelism", "Congestion Avoidance"]
+  },
+  {
+    "id": 2,
+    "tag": "Database",
+    "prompt": "Scenario: We have JSON logs in S3. We need to run ad-hoc SQL queries with the LEAST operational overhead. What tool do we use?",
+    "idealAnswer": "Amazon Athena.",
+    "keywords": ["Serverless", "Standard SQL", "No ETL", "Pay-per-scan"]
+  },
+  {
+    "id": 3,
+    "tag": "Security",
+    "prompt": "How can we limit S3 bucket access to only accounts within our AWS Organization without manually listing every account ID?",
+    "idealAnswer": "Use the aws:PrincipalOrgID global condition key in the bucket policy.",
+    "keywords": ["Condition Key", "Resource-based Policy", "AWS Organizations"]
+  },
+  {
+    "id": 4,
+    "tag": "Network",
+    "prompt": "An EC2 instance in a private VPC needs to access S3 without traversing the public internet. How do you design this?",
+    "idealAnswer": "Create a Gateway VPC Endpoint for S3.",
+    "keywords": ["Private Path", "Routing Table", "No NAT Gateway", "No IGW"]
+  },
+  {
+    "id": 5,
+    "tag": "Storage",
+    "prompt": "A duplicated app across two AZs shows inconsistent files because they are stored on EBS. How do we ensure a unified view?",
+    "idealAnswer": "Migrate data to Amazon EFS (Elastic File System).",
+    "keywords": ["Shared Storage", "NFS", "Simultaneous Access", "POSIX"]
+  },
+  {
+    "id": 6,
+    "tag": "Migration",
+    "prompt": "We need to migrate 70TB of video files from on-prem NFS to S3 quickly with limited bandwidth. Your move?",
+    "idealAnswer": "AWS Snowball Edge.",
+    "keywords": ["Physical Transfer", "100Gbps", "Zero Bandwidth Impact", "Offline Migration"]
+  },
+  {
+    "id": 7,
+    "tag": "Network",
+    "prompt": "Our message volume hits 100k/sec. We need to decouple the producer and dozens of microservice consumers. How?",
+    "idealAnswer": "SNS Topic with multiple SQS subscriptions (Fan-out).",
+    "keywords": ["Decoupling", "Fan-out", "Durability", "SQS Buffering"]
+  },
+  {
+    "id": 8,
+    "tag": "Compute",
+    "prompt": "A distributed app has variable workloads. How do we modernize it for maximum resiliency and scalability on EC2?",
+    "idealAnswer": "SQS Queue + EC2 Auto Scaling based on queue size.",
+    "keywords": ["Decoupled", "Target Tracking", "Queue Depth", "Auto Scaling Group"]
+  },
+  {
+    "id": 9,
+    "tag": "Storage",
+    "prompt": "An SMB file server is running out of space. We need low-latency access to new files but lifecycle management for old ones. Solution?",
+    "idealAnswer": "Amazon S3 File Gateway + S3 Lifecycle (Glacier Deep Archive).",
+    "keywords": ["Hybrid Storage", "Cached Files", "WORM", "Storage Gateway"]
+  },
+  {
+    "id": 10,
+    "tag": "Serverless",
+    "prompt": "An ecommerce app uses API Gateway. We must process orders in the exact sequence they were received. How?",
+    "idealAnswer": "API Gateway -> SQS FIFO Queue -> AWS Lambda.",
+    "keywords": ["FIFO", "Message Ordering", "Sequential Processing", "Idempotency"]
+  },
+  {
+    "id": 11,
+    "tag": "Security",
+    "prompt": "How do we handle RDS credentials securely without hardcoding them in EC2 local files?",
+    "idealAnswer": "AWS Secrets Manager + IAM Roles.",
+    "keywords": ["Automatic Rotation", "KMS Encryption", "API Fetch", "No Hardcoding"]
+  },
+  {
+    "id": 12,
+    "tag": "Network",
+    "prompt": "How do we improve performance for a global app with both static (S3) and dynamic (ALB) content using one domain?",
+    "idealAnswer": "CloudFront with multiple origins (S3 and ALB).",
+    "keywords": ["CDN", "Edge Locations", "Route 53 Alias", "Origin Selection"]
+  },
+  {
+    "id": 13,
+    "tag": "Security",
+    "prompt": "We need to rotate RDS MySQL credentials across multiple Regions with minimal overhead. What's the plan?",
+    "idealAnswer": "AWS Secrets Manager with Multi-Region secret replication.",
+    "keywords": ["Replication", "Rotation Schedule", "Cross-Region", "Managed Secret"]
+  },
+  {
+    "id": 14,
+    "tag": "Database",
+    "prompt": "Our database performance drops under high read load. How do we scale reads automatically and keep HA?",
+    "idealAnswer": "Amazon Aurora Multi-AZ with Aurora Replicas.",
+    "keywords": ["Horizontal Scaling", "Read Replicas", "Shared Storage", "Auto Scaling"]
+  },
+  {
+    "id": 19,
+    "tag": "Network",
+    "prompt": "We need to centralize a 3rd-party firewall appliance to inspect traffic for multiple VPCs. How?",
+    "idealAnswer": "Gateway Load Balancer (GWLB) + GWLB Endpoints.",
+    "keywords": ["Inline Inspection", "Transparent VNF", "Appliance Scaling", "VPC Endpoint"]
+  },
+  {
+    "id": 21,
+    "tag": "Serverless",
+    "prompt": "A 'one-deal-a-day' site expects millions of hits in 1 hour. What's the least operational overhead architecture?",
+    "idealAnswer": "S3 (Static) + CloudFront + API Gateway + Lambda + DynamoDB.",
+    "keywords": ["Serverless", "Global CDN", "On-Demand Scaling", "High Availability"]
+  },
+  {
+    "id": 23,
+    "tag": "Storage",
+    "prompt": "We have backups that are hot for 30 days then never accessed. How do we store them indefinitely at the lowest cost?",
+    "idealAnswer": "S3 Lifecycle: Standard -> Glacier Deep Archive after 30 days.",
+    "keywords": ["Cost Optimization", "Lifecycle Policy", "Indefinite Retention", "Lowest Cost Tier"]
+  }
+]
