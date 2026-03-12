@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Design Interviewer Guide | All-In-One</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .active-tag { background-color: #f97316 !important; color: white !important; }
+        .details-hidden { display: none; }
+        .card-enter { animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-slate-50 flex min-h-screen">
+
+    <aside class="w-64 bg-slate-900 text-slate-300 p-6 sticky top-0 h-screen overflow-y-auto hidden lg:block">
+        <div class="mb-8">
+            <a href="index.html" class="text-orange-400 font-bold hover:text-white transition-all text-sm uppercase">← Dashboard</a>
+        </div>
+        <div class="mb-10 font-black text-2xl tracking-tighter text-white">SYSTEM <span class="text-orange-500">HIRE</span></div>
+
+        <h2 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Interview Domains</h2>
+        <nav class="space-y-2" id="tagList">
+            <button onclick="filterTag('all')" class="active-tag w-full text-left px-4 py-2 rounded-xl text-sm font-bold transition-all">All Scenarios</button>
+            <button onclick="filterTag('Requirements')" class="w-full text-left px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all">Requirements</button>
+            <button onclick="filterTag('Scalability')" class="w-full text-left px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all">Scalability</button>
+            <button onclick="filterTag('Database')" class="w-full text-left px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all">Database</button>
+            <button onclick="filterTag('Caching')" class="w-full text-left px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all">Caching</button>
+            <button onclick="filterTag('Reliability')" class="w-full text-left px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all">Reliability</button>
+            <button onclick="filterTag('Security')" class="w-full text-left px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all">Security</button>
+            <button onclick="filterTag('Trade-offs')" class="w-full text-left px-4 py-2 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all">Trade-offs</button>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-6 md:p-12">
+        <header class="mb-10 flex justify-between items-end">
+            <div>
+                <h1 class="text-4xl font-black text-slate-900 tracking-tight">System Design <span class="text-orange-600">Interviewer</span></h1>
+                <p class="text-slate-500 font-medium italic mt-2 text-lg">Drive architecture conversations. Evaluate decision quality.</p>
+            </div>
+            <div id="stats" class="bg-orange-100 text-orange-700 px-4 py-2 rounded-full font-black text-xs uppercase tracking-widest">
+                Scenarios: 30
+            </div>
+        </header>
+
+        <div class="relative mb-10">
+            <input type="text" id="searchInput" onkeyup="searchContent()"
+                placeholder="Search topics (e.g. 'partitioning', 'queue', 'consistency')..."
+                class="w-full p-5 pl-14 rounded-2xl border-2 border-slate-200 shadow-sm focus:border-orange-500 focus:outline-none bg-white text-lg transition-all">
+            <svg class="w-6 h-6 absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+
+        <div id="questionsContainer" class="space-y-6"></div>
+    </main>
+
+<script>
+    const systemDesignData = [
+        {
+            tag: "Requirements",
+            prompt: "Design a URL shortener like bit.ly. What functional and non-functional requirements would you clarify first?",
+            answer: "Clarify create/redirect APIs, custom aliases, expiration, analytics. Non-functional: read-heavy traffic, low latency redirects, high availability, abuse prevention, global distribution.",
+            keywords: ["Clarifying questions", "Read-heavy", "Latency SLO", "Capacity estimation"]
+        },
+        {
+            tag: "Requirements",
+            prompt: "Before designing a chat system, what assumptions would you validate with the interviewer?",
+            answer: "1:1 vs group chat, message ordering, delivery guarantees, online presence, media support, retention duration, expected DAU/MAU, and regional compliance requirements.",
+            keywords: ["Ordering", "Delivery semantics", "Presence", "Retention"]
+        },
+        {
+            tag: "Requirements",
+            prompt: "Design Dropbox/Google Drive. Which product requirements most influence architecture choices?",
+            answer: "File size limits, sync frequency, conflict resolution behavior, offline mode, version history, sharing model, and expected active devices per user.",
+            keywords: ["Conflict resolution", "Versioning", "Sync protocol", "Device fanout"]
+        },
+        {
+            tag: "Scalability",
+            prompt: "How would you estimate capacity for a news feed system for 50M daily active users?",
+            answer: "Estimate QPS for reads/writes, average post size, fanout multiplier, storage growth, cache hit targets, and peak traffic multipliers. Convert assumptions into rough infra sizing.",
+            keywords: ["Back-of-envelope", "QPS", "Peak factor", "Fanout"]
+        },
+        {
+            tag: "Scalability",
+            prompt: "When would you use horizontal partitioning (sharding) and what shard key pitfalls should be avoided?",
+            answer: "Use sharding when single-node limits are reached. Avoid hot partitions by choosing high-cardinality, evenly distributed shard keys; prepare for re-sharding.",
+            keywords: ["Hot key", "Shard key", "Rebalancing", "Consistent hashing"]
+        },
+        {
+            tag: "Scalability",
+            prompt: "Explain fanout-on-write vs fanout-on-read for feed generation.",
+            answer: "Fanout-on-write precomputes feeds for fast reads but expensive writes. Fanout-on-read computes at read time, lowering write cost but increasing read latency and complexity.",
+            keywords: ["Write amplification", "Read latency", "Hybrid model", "Celebrity problem"]
+        },
+        {
+            tag: "Scalability",
+            prompt: "How do load balancers improve scalability, and what layer (L4/L7) trade-offs matter?",
+            answer: "They distribute requests and enable horizontal scaling. L4 is faster and protocol-level; L7 enables smarter routing, sticky sessions, and app-aware policies at higher overhead.",
+            keywords: ["L4 vs L7", "Health checks", "Sticky sessions", "Autoscaling"]
+        },
+        {
+            tag: "Database",
+            prompt: "How do you choose between SQL and NoSQL for a given system design?",
+            answer: "Choose SQL for strong consistency, relational queries, and transactions. Choose NoSQL for flexible schema, horizontal scale, and high write throughput with denormalized access patterns.",
+            keywords: ["Access patterns", "Transactions", "Schema flexibility", "Consistency"]
+        },
+        {
+            tag: "Database",
+            prompt: "What is database replication and how do leader-follower vs multi-leader setups differ?",
+            answer: "Replication copies data across nodes for availability and read scale. Leader-follower simplifies conflict handling. Multi-leader improves write locality but introduces conflict-resolution complexity.",
+            keywords: ["Leader-follower", "Conflict resolution", "Replication lag", "Write locality"]
+        },
+        {
+            tag: "Database",
+            prompt: "Explain eventual consistency with a practical example.",
+            answer: "Replicas may temporarily disagree after writes, but converge over time. Example: a user updates profile photo and some regions show old image briefly due to propagation delay.",
+            keywords: ["Consistency model", "Propagation delay", "Convergence", "CAP"]
+        },
+        {
+            tag: "Database",
+            prompt: "When would you denormalize data, and what risks does it introduce?",
+            answer: "Denormalize for read performance and fewer joins. Risks include duplicate data, stale/inconsistent copies, and more complex update workflows.",
+            keywords: ["Read optimization", "Data duplication", "Write complexity", "Materialized view"]
+        },
+        {
+            tag: "Caching",
+            prompt: "Where can caching be applied in a web-scale architecture?",
+            answer: "Client cache, CDN/edge, API gateway cache, application cache (Redis/Memcached), and database query/result caches. Multi-layer caching reduces origin load and latency.",
+            keywords: ["CDN", "Redis", "Cache hierarchy", "Latency reduction"]
+        },
+        {
+            tag: "Caching",
+            prompt: "How would you handle cache invalidation for frequently updated data?",
+            answer: "Use a strategy combining TTL, explicit invalidation on write, versioned keys, and event-driven invalidation. Prefer correctness-first for user-visible critical data.",
+            keywords: ["TTL", "Write-through", "Versioned keys", "Pub/sub invalidation"]
+        },
+        {
+            tag: "Caching",
+            prompt: "What is a cache stampede and how do you prevent it?",
+            answer: "A cache stampede happens when many requests miss simultaneously and overload origin. Prevent via request coalescing, jittered TTLs, stale-while-revalidate, and locks.",
+            keywords: ["Dogpile effect", "Single-flight", "Jitter", "Stale-while-revalidate"]
+        },
+        {
+            tag: "Caching",
+            prompt: "Compare write-through, write-around, and write-back caching.",
+            answer: "Write-through updates cache and DB together (safe, slower writes). Write-around bypasses cache on write (fewer cache writes). Write-back buffers writes in cache (fast, durability risk).",
+            keywords: ["Durability", "Latency", "Consistency", "Write policy"]
+        },
+        {
+            tag: "Reliability",
+            prompt: "Design a highly available API service across multiple regions.",
+            answer: "Deploy stateless app replicas in multiple regions, global traffic routing with health checks, regional failover, replicated data stores, and runbooks for disaster recovery.",
+            keywords: ["Multi-region", "Failover", "RTO/RPO", "Health checks"]
+        },
+        {
+            tag: "Reliability",
+            prompt: "What are idempotency keys and why are they important in distributed systems?",
+            answer: "Idempotency keys ensure retries do not create duplicate side effects (like duplicate payments/orders). Server stores request key + result to return safe repeat responses.",
+            keywords: ["Safe retries", "Duplicate prevention", "Exactly-once illusion", "Request dedup"]
+        },
+        {
+            tag: "Reliability",
+            prompt: "How would you design for graceful degradation during partial outages?",
+            answer: "Prioritize core flows, disable non-critical features, serve stale cached responses, rate limit expensive operations, and use circuit breakers to isolate failing dependencies.",
+            keywords: ["Circuit breaker", "Fallback", "Bulkhead", "Prioritized service"]
+        },
+        {
+            tag: "Reliability",
+            prompt: "What is a dead-letter queue and when should it be used?",
+            answer: "A DLQ stores messages that repeatedly fail processing. Use it to isolate poison messages, avoid blocking pipelines, and enable manual or automated replay workflows.",
+            keywords: ["Poison message", "Retry policy", "Message replay", "Observability"]
+        },
+        {
+            tag: "Reliability",
+            prompt: "How do you monitor a distributed system effectively?",
+            answer: "Use the three pillars: metrics, logs, traces. Track SLIs/SLOs, define alerts on user-impacting symptoms, and propagate correlation IDs for cross-service debugging.",
+            keywords: ["SLI/SLO", "Distributed tracing", "Correlation ID", "Alerting"]
+        },
+        {
+            tag: "Security",
+            prompt: "What security controls should be baseline in a public-facing system design?",
+            answer: "TLS everywhere, authn/authz, least-privilege IAM, WAF/rate limits, secret management, encryption at rest, audit logging, and vulnerability patching processes.",
+            keywords: ["TLS", "Least privilege", "WAF", "Secrets management"]
+        },
+        {
+            tag: "Security",
+            prompt: "How do you protect an API from abuse and denial-of-service behavior?",
+            answer: "Apply global and per-tenant rate limits, bot detection, request validation, quotas, adaptive throttling, and upstream scrubbing/CDN protection for volumetric attacks.",
+            keywords: ["Rate limiting", "Token bucket", "Throttling", "DDoS mitigation"]
+        },
+        {
+            tag: "Security",
+            prompt: "How would you design secure authentication for mobile and web clients?",
+            answer: "Use OAuth2/OIDC, short-lived access tokens, refresh token rotation, secure storage, device-bound sessions where possible, and robust session revocation.",
+            keywords: ["OAuth2", "OIDC", "JWT", "Refresh rotation"]
+        },
+        {
+            tag: "Trade-offs",
+            prompt: "How do you reason about consistency vs availability under network partitions?",
+            answer: "Under partition, CAP implies choosing between strong consistency and high availability for a specific operation. Most systems choose per-path trade-offs, not one global mode.",
+            keywords: ["CAP theorem", "Partition tolerance", "Per-operation choice", "Latency"]
+        },
+        {
+            tag: "Trade-offs",
+            prompt: "When would you choose a monolith over microservices for a new product?",
+            answer: "Choose monolith for small teams, fast iteration, and simpler operations early on. Split to services when scaling teams/domain boundaries and independent deployment become bottlenecks.",
+            keywords: ["Team topology", "Operational overhead", "Deployment independence", "Bounded context"]
+        },
+        {
+            tag: "Trade-offs",
+            prompt: "How do queues improve system resilience, and what latency costs do they introduce?",
+            answer: "Queues decouple producers/consumers and absorb bursts. They improve durability and retries but add asynchronous delay, ordering complexity, and at-least-once semantics handling.",
+            keywords: ["Decoupling", "Backpressure", "At-least-once", "Eventual processing"]
+        },
+        {
+            tag: "Trade-offs",
+            prompt: "Should you use synchronous REST calls or asynchronous events between services?",
+            answer: "Use sync calls for immediate response requirements and simple flows. Use events for decoupling, scalability, and resilience. Many systems use a hybrid approach.",
+            keywords: ["Request-response", "Event-driven", "Temporal coupling", "Hybrid architecture"]
+        },
+        {
+            tag: "Trade-offs",
+            prompt: "How do you decide between pre-computation and on-demand computation?",
+            answer: "Pre-compute when read latency is critical and data freshness tolerance exists. Compute on-demand when write rates are high, freshness is strict, or storage costs dominate.",
+            keywords: ["Materialization", "Freshness", "Compute vs storage", "Latency budget"]
+        },
+        {
+            tag: "Trade-offs",
+            prompt: "How would you explain and mitigate the single point of failure in a design review?",
+            answer: "Identify critical singleton dependencies and add redundancy: active-active or active-passive instances, health checks, automated failover, and periodic chaos/failover drills.",
+            keywords: ["SPOF", "Redundancy", "Active-active", "Chaos testing"]
+        },
+        {
+            tag: "Trade-offs",
+            prompt: "What decisions would you document in an architecture decision record (ADR) after a design interview?",
+            answer: "Record context, alternatives considered, chosen option, consequences, rollback plan, and unresolved risks. This captures rationale for future maintainers and reviewers.",
+            keywords: ["ADR", "Alternatives", "Consequences", "Rationale"]
+        }
+    ];
+
+    function renderCards(data) {
+        const container = document.getElementById('questionsContainer');
+        document.getElementById('stats').textContent = `Scenarios: ${data.length}`;
+        container.innerHTML = data.map(item => `
+            <div class="question-card bg-white rounded-3xl border border-slate-200 shadow-sm p-8 card-enter transition-all hover:border-orange-300">
+                <div class="flex justify-between items-start mb-6">
+                    <span class="px-3 py-1 bg-orange-100 text-orange-700 text-[10px] font-black uppercase rounded-full tracking-wider">${item.tag}</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 mb-8 leading-relaxed italic text-orange-900 underline decoration-orange-100 decoration-4">
+                    "${item.prompt}"
+                </h3>
+
+                <button onclick="toggleAnswer(this)" class="group flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest hover:text-orange-600 transition-colors">
+                    <span>Show Evaluator Checklist</span>
+                    <svg class="w-4 h-4 transition-transform group-hover:translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+
+                <div class="details-hidden mt-8 p-6 bg-slate-50 rounded-2xl border-t-4 border-orange-500">
+                    <div class="mb-6">
+                        <div class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-2">Ideal Technical Direction:</div>
+                        <div class="text-lg font-bold text-slate-800">${item.answer}</div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Listen for these keywords:</div>
+                        <div class="flex flex-wrap gap-2">
+                            ${item.keywords.map(k => `<span class="bg-white border border-slate-200 text-slate-700 text-[10px] px-3 py-1.5 rounded-lg font-bold shadow-sm italic"># ${k}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function toggleAnswer(btn) {
+        const div = btn.nextElementSibling;
+        const isHidden = div.classList.contains('details-hidden');
+        div.classList.toggle('details-hidden');
+        btn.querySelector('span').innerText = isHidden ? "Hide Checklist" : "Show Evaluator Checklist";
+    }
+
+    function filterTag(tag) {
+        document.querySelectorAll('#tagList button').forEach(b => b.classList.remove('active-tag'));
+        event.currentTarget.classList.add('active-tag');
+        if (tag === 'all') {
+            renderCards(systemDesignData);
+        } else {
+            const filtered = systemDesignData.filter(d => d.tag === tag);
+            renderCards(filtered);
+        }
+    }
+
+    function searchContent() {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = systemDesignData.filter(d =>
+            d.prompt.toLowerCase().includes(term) ||
+            d.answer.toLowerCase().includes(term) ||
+            d.tag.toLowerCase().includes(term)
+        );
+        renderCards(filtered);
+    }
+
+    renderCards(systemDesignData);
+</script>
+</body>
+</html>
